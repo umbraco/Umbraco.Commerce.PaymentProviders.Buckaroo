@@ -10,8 +10,8 @@
   "LicenseTypes": [
     "Free"
   ],
-  "DocumentationUrl": "https://docs.umbraco.com/umbraco-commerce-payment-providers/stripe",
-  "IssueTrackerUrl": "https://github.com/umbraco/Umbraco.Commerce.PaymentProviders.Stripe/issues",
+  "DocumentationUrl": "https://docs.umbraco.com/umbraco-commerce-payment-providers/buckaroo",
+  "IssueTrackerUrl": "https://github.com/umbraco/Umbraco.Commerce.PaymentProviders.Buckaroo/issues",
   "PackageType": "Package",
   "PackagesByAuthor": [
     "Umbraco.Forms",
