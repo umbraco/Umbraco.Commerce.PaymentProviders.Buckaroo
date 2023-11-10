@@ -1,3 +1,3 @@
-# Umbraco Commerce Stripe Payment Provider &middot; [![NuGet](https://img.shields.io/nuget/v/Umbraco.Commerce.PaymentProviders.Stripe.svg?style=modern&label=nuget)](https://www.nuget.org/packages/Umbraco.Commerce.PaymentProviders.Stripe/) 
+# Umbraco Commerce Buckaroo Payment Provider &middot; [![NuGet](https://img.shields.io/nuget/v/Umbraco.Commerce.PaymentProviders.Buckaroo.svg?style=modern&label=nuget)](https://www.nuget.org/packages/Umbraco.Commerce.PaymentProviders.Buckaroo/) 
 
-Stripe Payment Provider for Umbraco Commerce
+Buckaroo Payment Provider for Umbraco Commerce

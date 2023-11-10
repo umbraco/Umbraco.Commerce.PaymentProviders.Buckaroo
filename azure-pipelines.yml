@@ -19,7 +19,7 @@ parameters:
 
 variables:
   nodeVersion: 18.x
-  solution: Umbraco.Commerce.PaymentProviders.Stripe.sln
+  solution: Umbraco.Commerce.PaymentProviders.Buckaroo.sln
   buildConfiguration: Release
   DOTNET_NOLOGO: true
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false

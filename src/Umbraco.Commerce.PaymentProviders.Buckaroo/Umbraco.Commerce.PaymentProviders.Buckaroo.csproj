@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Title>Umbraco Commerce Stripe Payment Provider</Title>
-    <Description>Stripe payment provider for Umbraco Commerce</Description>
+    <Title>Umbraco Commerce Buckaroo Payment Provider</Title>
+    <Description>Buckaroo payment provider for Umbraco Commerce</Description>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
