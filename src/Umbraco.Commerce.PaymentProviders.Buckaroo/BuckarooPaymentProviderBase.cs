@@ -1,11 +1,7 @@
 using System;
-using System.Threading.Tasks;
-using System.Threading;
 using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Api;
-using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.Core.PaymentProviders;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 {
@@ -44,12 +40,6 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             ArgumentNullException.ThrowIfNull(context);
 
             return context.Settings.ErrorUrl;
-        }
-
-        public override async Task<OrderReference> GetOrderReferenceAsync(PaymentProviderContext<TSettings> context, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-            return await base.GetOrderReferenceAsync(context, cancellationToken).ConfigureAwait(false);
         }
     }
 }

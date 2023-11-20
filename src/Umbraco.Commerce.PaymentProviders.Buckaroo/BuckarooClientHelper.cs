@@ -36,8 +36,8 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 
             return new BuckarooAuthenticateRequestInput
             {
-                WebsiteKey = settings.WebsiteKey,
-                ApiKey = settings.ApiKey,
+                WebsiteKey = settings.LiveWebsiteKey,
+                ApiKey = settings.LiveApiKey,
                 IsLive = !settings.IsTestMode,
                 Channel = ChannelEnum.Web,
                 CultureInfo = CultureInfo.CurrentCulture,

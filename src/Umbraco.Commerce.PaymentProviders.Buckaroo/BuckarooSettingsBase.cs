@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Umbraco.Commerce.Core.PaymentProviders;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo
@@ -15,15 +14,15 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
         public string ErrorUrl { get; set; } = string.Empty;
 
         [PaymentProviderSetting(Name = "Website key", Description = "The website key, which can be found here: https://plaza.buckaroo.nl/Configuration/WebSite/Index/", SortOrder = 400)]
-        public string WebsiteKey { get; set; } = string.Empty;
+        public string LiveWebsiteKey { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets secret key.
         /// </summary>
         [PaymentProviderSetting(Name = "Secret key", Description = "The secret key, which can be found here: https://plaza.buckaroo.nl/Configuration/Merchant/SecretKey", SortOrder = 500)]
-        public string ApiKey { get; set; } = string.Empty;
+        public string LiveApiKey { get; set; } = string.Empty;
 
-        [PaymentProviderSetting(Name = "Test mode", Description = "Set whether to process payments in test mode", SortOrder = 10000)]
+        [PaymentProviderSetting(Name = "Enable test mode", Description = "Set whether to process payments in test mode", SortOrder = 10000)]
         public bool IsTestMode { get; set; }
 
         [PaymentProviderSetting(Name = "Website key for test mode", Description = "", SortOrder = 600)]
