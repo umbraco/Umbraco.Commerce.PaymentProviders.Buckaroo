@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using BuckarooSdk.Connection;
 using BuckarooSdk.DataTypes;
 using BuckarooSdk.DataTypes.RequestBases;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +19,8 @@ using Umbraco.Commerce.Core.Api;
 using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.Core.PaymentProviders;
 using Umbraco.Commerce.Extensions;
+using Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions;
+using Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 {
@@ -41,9 +46,6 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
         // Don't finalize at continue as we will finalize async via webhook
         public override bool FinalizeAtContinueUrl => false;
 
-        /// <summary>
-        /// TODO - Dinh: double check the metadata
-        /// </summary>
         public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]
         {
             new TransactionMetaDataDefinition("buckarooSessionId", "Buckaroo Session ID"),
@@ -89,8 +91,6 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
                 .GetAuthenticatedRequest(context.Settings)
                 .TransactionRequest()
                 .SetBasicFields(data)
-
-                // ToDo: for now it's fine to select a service at Buckaroo, but it might be nice to implement available services etc.
                 .NoServiceSelected()
                 .Pay()
                 .ExecuteAsync()
@@ -108,7 +108,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 
             try
             {
-                BuckarooWebhookEvent? buckarooEvent = await ParseWebhookDataAsync(context, cancellationToken).ConfigureAwait(false);
+                BuckarooWebhookTransaction? buckarooEvent = await ParseWebhookDataAsync(context, cancellationToken).ConfigureAwait(false);
                 if (buckarooEvent == null || !buckarooEvent.IsSuccess)
                 {
                     // Just returns OK without finalizing the order
@@ -125,9 +125,9 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
                 {
                     var transactionInfo = new TransactionInfo
                     {
-                        TransactionId = buckarooEvent.PaymentId,
-                        PaymentStatus = buckarooEvent.StatusCode.ToPaymentStatus(),
-                        AmountAuthorized = buckarooEvent.Amount ?? 0,
+                        TransactionId = buckarooEvent.Key,
+                        PaymentStatus = buckarooEvent.Status.Code.Code.ToPaymentStatus(),
+                        AmountAuthorized = buckarooEvent.AmountDebit ?? buckarooEvent.AmountCredit ?? 0,
                     };
 
                     return CallbackResult.Ok(transactionInfo);
@@ -142,14 +142,33 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             return CallbackResult.BadRequest();
         }
 
-        private static async Task<BuckarooWebhookEvent?> ParseWebhookDataAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken)
+        private static async Task<BuckarooWebhookTransaction?> ParseWebhookDataAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken)
         {
-            if (context.Request.Content == null)
+            HttpRequestMessage request = context.Request;
+            request.Headers.TryGetValues("Authorization", out IEnumerable<string>? headers);
+            if (headers == null || string.IsNullOrEmpty(headers.FirstOrDefault()))
             {
                 return null;
             }
 
-            Stream stream = await context.Request.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            if (request.Content == null)
+            {
+                return null;
+            }
+
+            string authorizationHeader = headers.First();
+            BuckarooApiCredentials apiCredentials = context.Settings.GetApiCredentials();
+            byte[] requestBody = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+            SignatureCalculationService signatureService = new();
+#pragma warning disable CA1308 // Do not normalize strings to uppercase because Buckaroo asks for lowercase string ¯\_(ツ)_/¯
+            bool signatureVerified = signatureService.VerifySignature(requestBody, request.Method.Method.ToUpperInvariant(), WebUtility.UrlEncode(apiCredentials.WebhookHostname + request.RequestUri!.PathAndQuery).ToLowerInvariant(), apiCredentials.SecretKey, authorizationHeader);
+#pragma warning restore CA1308 // Normalize strings to uppercase
+            if (!signatureVerified)
+            {
+                return null;
+            }
+
+            Stream stream = new MemoryStream(requestBody);
             if (stream.CanSeek)
             {
                 stream.Seek(0, SeekOrigin.Begin);
@@ -158,16 +177,12 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
                 string requestBodyContent = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-
-                // TODO: Dinh - Maybe we need to validate the webhook signature
-                //EventUtility.ValidateSignature(json, buckarooSignature, webhookSigningSecret);
-
-                BuckarooWebhookEvent buckarooEvent = ParseWebhookBodyContent(requestBodyContent) ?? throw new NotImplementedException("Unable to parse buckaroo push message to object");
+                BuckarooWebhookTransaction buckarooEvent = JsonConvert.DeserializeObject<BuckarooWebhookResponse?>(requestBodyContent)?.Transaction ?? throw new NotImplementedException("Unable to parse buckaroo push message to object");
                 return buckarooEvent;
             }
         }
 
-        private static BuckarooWebhookEvent? ParseWebhookBodyContent(string queryString)
+        private static BuckarooWebhookTransaction? ParseWebhookBodyContent(string queryString)
         {
             NameValueCollection nameValueCollection = HttpUtility.ParseQueryString(queryString);
             var dict = nameValueCollection
@@ -176,15 +191,9 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 
             // Transform postdata to json and deserialize
             var json = JsonConvert.SerializeObject(dict);
-            return JsonConvert.DeserializeObject<BuckarooWebhookEvent?>(json);
+            return JsonConvert.DeserializeObject<BuckarooWebhookTransaction?>(json);
         }
 
-        /// <summary>
-        /// This should work in theory, but it's not used by Vendr yet...
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public override Task<ApiResult> FetchPaymentStatusAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(context);

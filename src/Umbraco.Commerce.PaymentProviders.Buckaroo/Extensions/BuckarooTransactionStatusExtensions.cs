@@ -1,7 +1,7 @@
 using System;
 using Umbraco.Commerce.Core.Models;
 
-namespace Umbraco.Commerce.PaymentProviders.Buckaroo
+namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions
 {
     public static class BuckarooTransactionStatusExtensions
     {
