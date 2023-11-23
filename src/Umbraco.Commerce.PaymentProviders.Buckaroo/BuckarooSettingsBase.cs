@@ -22,19 +22,16 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
         [PaymentProviderSetting(Name = "Secret key", Description = "The secret key, which can be found here: https://plaza.buckaroo.nl/Configuration/Merchant/SecretKey", SortOrder = 500)]
         public string LiveApiKey { get; set; } = string.Empty;
 
-        [PaymentProviderSetting(Name = "Webhook hostname", Description = "Set this field to the host you want to receive push message from Buckaroo. Enter hostname only. eg: 'umbraco.com'", SortOrder = 650)]
-        public string LiveWebhookHostname { get; set; } = string.Empty;
-
         [PaymentProviderSetting(Name = "Enable test mode", Description = "Set whether to process payments in test mode", SortOrder = 10000)]
         public bool IsTestMode { get; set; }
 
-        [PaymentProviderSetting(Name = "Website key for test mode", Description = "", SortOrder = 600)]
+        [PaymentProviderSetting(Name = "Website key for test mode", Description = "", SortOrder = 10010)]
         public string TestWebsiteKey { get; set; } = string.Empty;
 
-        [PaymentProviderSetting(Name = "Secret key for test mode", Description = "", SortOrder = 650)]
+        [PaymentProviderSetting(Name = "Secret key for test mode", Description = "", SortOrder = 10020)]
         public string TestApiKey { get; set; } = string.Empty;
 
-        [PaymentProviderSetting(Name = "Webhook hostname for test mode", Description = "This field is used when you want to test webhook. eg: 'localhost:8888' or 'umbraco.com'", SortOrder = 650)]
+        [PaymentProviderSetting(Name = "Webhook hostname for test mode", Description = "This field is used when you want to test webhook. Enter hostname only. eg: 'localhost:8888' or 'umbraco.com'", SortOrder = 10030)]
         public string TestWebhookHostname { get; set; } = string.Empty;
     }
 }

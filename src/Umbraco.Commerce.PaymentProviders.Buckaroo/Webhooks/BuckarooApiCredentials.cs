@@ -7,7 +7,5 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks
         public required string SecretKey { get; set; }
 
         public bool IsLive { get; set; }
-
-        public required string WebhookHostname { get; set; }
     }
 }

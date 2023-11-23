@@ -160,9 +160,13 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             BuckarooApiCredentials apiCredentials = context.Settings.GetApiCredentials();
             byte[] requestBody = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
             SignatureCalculationService signatureService = new();
+
 #pragma warning disable CA1308 // Do not normalize strings to uppercase because Buckaroo asks for lowercase string ¯\_(ツ)_/¯
-            bool signatureVerified = signatureService.VerifySignature(requestBody, request.Method.Method.ToUpperInvariant(), WebUtility.UrlEncode(apiCredentials.WebhookHostname + request.RequestUri!.PathAndQuery).ToLowerInvariant(), apiCredentials.SecretKey, authorizationHeader);
+            string webhookHostname = !string.IsNullOrWhiteSpace(context.Settings.TestWebhookHostname) ? context.Settings.TestWebhookHostname : request.RequestUri!.Authority;
+            string encodedUri = WebUtility.UrlEncode(webhookHostname + request.RequestUri!.PathAndQuery).ToLowerInvariant();
 #pragma warning restore CA1308 // Normalize strings to uppercase
+
+            bool signatureVerified = signatureService.VerifySignature(requestBody, request.Method.Method.ToUpperInvariant(), encodedUri, apiCredentials.SecretKey, authorizationHeader);
             if (!signatureVerified)
             {
                 return null;

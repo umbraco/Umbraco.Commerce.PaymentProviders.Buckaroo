@@ -18,7 +18,6 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions
                     WebsiteKey = settings.TestWebsiteKey,
                     SecretKey = settings.TestApiKey,
                     IsLive = !settings.IsTestMode,
-                    WebhookHostname = settings.TestWebhookHostname,
                 };
             }
 
@@ -27,7 +26,6 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions
                 WebsiteKey = settings.LiveWebsiteKey,
                 SecretKey = settings.LiveApiKey,
                 IsLive = !settings.IsTestMode,
-                WebhookHostname = settings.LiveWebhookHostname,
             };
         }
     }
