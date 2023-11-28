@@ -4,16 +4,16 @@
     "net8.0": {
       "BuckarooSdk": {
         "type": "Direct",
-        "requested": "[1.4.1, )",
-        "resolved": "1.4.1",
-        "contentHash": "ooACkuxdjStRviUkEbNrU2OZLzwZmIM3AfybURaHKg3bWF91/rWHVjLYRE6zWRb2sWB21Xvwvw3TOMvqQJuwkQ==",
+        "requested": "[1.4.0, 2.0.0)",
+        "resolved": "1.4.0",
+        "contentHash": "NNIYFW59kNNSEuXNAZr1tcBHRLkuv+wN4vrIeZW1UImvQpeSznHsTlRtuWUdhvccsN8ey+1nyuczbyJBfRgBzA==",
         "dependencies": {
           "Newtonsoft.Json": "12.0.3"
         }
       },
       "Microsoft.AspNet.WebApi.Client": {
         "type": "Direct",
-        "requested": "[6.0.0, )",
+        "requested": "[6.0.0, 7.0.0)",
         "resolved": "6.0.0",
         "contentHash": "zXeWP03dTo67AoDHUzR+/urck0KFssdCKOC+dq7Nv1V2YbFh/nIg09L0/3wSvyRONEdwxGB/ssEGmPNIIhAcAw==",
         "dependencies": {
@@ -25,7 +25,7 @@
       },
       "Microsoft.AspNetCore.Http.Abstractions": {
         "type": "Direct",
-        "requested": "[2.2.0, )",
+        "requested": "[2.2.0, 3.0.0)",
         "resolved": "2.2.0",
         "contentHash": "Nxs7Z1q3f1STfLYKJSVXCs1iBl+Ya6E8o4Oy1bCxJ/rNI44E/0f6tbsrVqAWfB7jlnJfyaAtIalBVxPKUPQb4Q==",
         "dependencies": {
@@ -69,7 +69,7 @@
       },
       "Umbraco.Commerce.Core": {
         "type": "Direct",
-        "requested": "[13.0.0-rc1, )",
+        "requested": "[13.0.0-rc1, 14.0.0)",
         "resolved": "13.0.0-rc1",
         "contentHash": "bjZTJhEt0ykfEwbHfNpSg4NVA3BqBSjw+8RWyeDVPD7S9vfWobuIDcv2dYWGfu5xUusIeRrW1ceSKGFPrFwxrA==",
         "dependencies": {
