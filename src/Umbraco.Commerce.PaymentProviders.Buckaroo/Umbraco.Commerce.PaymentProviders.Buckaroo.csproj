@@ -4,7 +4,6 @@
     <Title>Umbraco Commerce Buckaroo Payment Provider</Title>
     <Description>Buckaroo payment provider for Umbraco Commerce</Description>
     <Nullable>enable</Nullable>
-    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
