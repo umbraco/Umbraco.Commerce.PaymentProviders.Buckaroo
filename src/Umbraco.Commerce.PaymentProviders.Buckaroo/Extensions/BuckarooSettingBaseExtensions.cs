@@ -9,24 +9,11 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions
         /// </summary>
         /// <param name="settings"></param>
         /// <returns>Live credentials or test credentials depends on <see cref="BuckarooSettingsBase.IsTestMode"/> value.</returns>
-        public static BuckarooApiCredentials GetApiCredentials(this BuckarooSettingsBase settings)
+        public static BuckarooApiCredentials GetApiCredentials(this BuckarooSettingsBase settings) => new BuckarooApiCredentials
         {
-            if (settings.IsTestMode)
-            {
-                return new BuckarooApiCredentials
-                {
-                    WebsiteKey = settings.TestWebsiteKey,
-                    SecretKey = settings.TestApiKey,
-                    IsLive = !settings.IsTestMode,
-                };
-            }
-
-            return new BuckarooApiCredentials
-            {
-                WebsiteKey = settings.LiveWebsiteKey,
-                SecretKey = settings.LiveApiKey,
-                IsLive = !settings.IsTestMode,
-            };
-        }
+            WebsiteKey = settings.WebsiteKey,
+            SecretKey = settings.ApiKey,
+            IsLive = !settings.IsTestMode,
+        };
     }
 }

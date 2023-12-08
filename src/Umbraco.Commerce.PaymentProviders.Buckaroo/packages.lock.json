@@ -4,9 +4,9 @@
     "net8.0": {
       "BuckarooSdk": {
         "type": "Direct",
-        "requested": "[1.4.0, 2.0.0)",
-        "resolved": "1.4.0",
-        "contentHash": "NNIYFW59kNNSEuXNAZr1tcBHRLkuv+wN4vrIeZW1UImvQpeSznHsTlRtuWUdhvccsN8ey+1nyuczbyJBfRgBzA==",
+        "requested": "[1.4.1, 2.0.0)",
+        "resolved": "1.4.1",
+        "contentHash": "ooACkuxdjStRviUkEbNrU2OZLzwZmIM3AfybURaHKg3bWF91/rWHVjLYRE6zWRb2sWB21Xvwvw3TOMvqQJuwkQ==",
         "dependencies": {
           "Newtonsoft.Json": "12.0.3"
         }
