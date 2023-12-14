@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,7 +7,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using BuckarooSdk.Connection;
 using BuckarooSdk.DataTypes;
 using BuckarooSdk.DataTypes.RequestBases;
@@ -18,7 +16,6 @@ using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Api;
 using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.Core.PaymentProviders;
-using Umbraco.Commerce.Extensions;
 using Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions;
 using Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks;
 
@@ -72,8 +69,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
                 Order = order.OrderNumber,
                 ReturnUrl = context.Urls.ContinueUrl,
                 ReturnUrlCancel = context.Urls.CancelUrl,
-                ReturnUrlError = context.Urls.ErrorUrl, // ToDo: the error url is different than the provided continue and cancel urls (webhook urls),
-                                                        // we probably want this from the method's arguments as well // ask Matt
+                ReturnUrlError = context.Urls.ErrorUrl,
                 ReturnUrlReject = context.Urls.CancelUrl,
                 StartRecurrent = false,
                 ClientIp = new IpAddress
@@ -116,23 +112,15 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
                 }
 
                 OrderReadOnly order = context.Order;
-                if (order.IsFinalized)
+
+                var transactionInfo = new TransactionInfo
                 {
-                    return CallbackResult.Empty;
-                }
+                    TransactionId = buckarooEvent.Key,
+                    PaymentStatus = buckarooEvent.Status.Code.Code.ToPaymentStatus(),
+                    AmountAuthorized = buckarooEvent.AmountDebit ?? buckarooEvent.AmountCredit ?? 0,
+                };
 
-                if (!order.IsFinalized)
-                {
-                    var transactionInfo = new TransactionInfo
-                    {
-                        TransactionId = buckarooEvent.Key,
-                        PaymentStatus = buckarooEvent.Status.Code.Code.ToPaymentStatus(),
-                        AmountAuthorized = buckarooEvent.AmountDebit ?? buckarooEvent.AmountCredit ?? 0,
-                    };
-
-                    return CallbackResult.Ok(transactionInfo);
-                }
-
+                return CallbackResult.Ok(transactionInfo);
             }
             catch (Exception ex)
             {
@@ -142,7 +130,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             return CallbackResult.BadRequest();
         }
 
-        private static async Task<BuckarooWebhookTransaction?> ParseWebhookDataAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken)
+        private async Task<BuckarooWebhookTransaction?> ParseWebhookDataAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken)
         {
             HttpRequestMessage request = context.Request;
             request.Headers.TryGetValues("Authorization", out IEnumerable<string>? headers);
@@ -162,13 +150,14 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             SignatureCalculationService signatureService = new();
 
 #pragma warning disable CA1308 // Do not normalize strings to uppercase because Buckaroo asks for lowercase string ¯\_(ツ)_/¯
-            string webhookHostname = !string.IsNullOrWhiteSpace(context.Settings.TestWebhookHostname) ? context.Settings.TestWebhookHostname : request.RequestUri!.Authority;
+            string webhookHostname = !string.IsNullOrWhiteSpace(context.Settings.WebhookHostnameOverwrite) ? context.Settings.WebhookHostnameOverwrite : request.RequestUri!.Authority;
             string encodedUri = WebUtility.UrlEncode(webhookHostname + request.RequestUri!.PathAndQuery).ToLowerInvariant();
 #pragma warning restore CA1308 // Normalize strings to uppercase
 
             bool signatureVerified = signatureService.VerifySignature(requestBody, request.Method.Method.ToUpperInvariant(), encodedUri, apiCredentials.SecretKey, authorizationHeader);
             if (!signatureVerified)
             {
+                Logger.Error("Buckaroo - Invalid signature. OrderNumber: '{OrderNumber}', CartNumber: '{CartNumber}'. encodedUri: '{encodedUri}'", context.Order.OrderNumber, context.Order.CartNumber, encodedUri);
                 return null;
             }
 
@@ -184,18 +173,6 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
                 BuckarooWebhookTransaction buckarooEvent = JsonConvert.DeserializeObject<BuckarooWebhookResponse?>(requestBodyContent)?.Transaction ?? throw new NotImplementedException("Unable to parse buckaroo push message to object");
                 return buckarooEvent;
             }
-        }
-
-        private static BuckarooWebhookTransaction? ParseWebhookBodyContent(string queryString)
-        {
-            NameValueCollection nameValueCollection = HttpUtility.ParseQueryString(queryString);
-            var dict = nameValueCollection
-                .OfType<string>()
-                .ToDictionary(key => key, key => nameValueCollection[key]);
-
-            // Transform postdata to json and deserialize
-            var json = JsonConvert.SerializeObject(dict);
-            return JsonConvert.DeserializeObject<BuckarooWebhookTransaction?>(json);
         }
 
         public override Task<ApiResult> FetchPaymentStatusAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken = default)
