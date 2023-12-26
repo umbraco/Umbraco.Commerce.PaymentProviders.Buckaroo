@@ -11,13 +11,19 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions
         /// Get a new instance of <see cref="AuthenticatedRequest"/> each time it is called.
         /// </summary>
         /// <param name="settings"></param>
+        /// <exception cref="BuckarooInvalidSettingsException"></exception>
         /// <returns></returns>
         public static AuthenticatedRequest GetAuthenticatedRequest(BuckarooSettingsBase settings)
         {
-            BuckarooApiCredentials input = settings.GetApiCredentials();
+            BuckarooApiCredentials credentials = settings.GetApiCredentials();
+            if (string.IsNullOrWhiteSpace(credentials.SecretKey) || string.IsNullOrWhiteSpace(credentials.WebsiteKey))
+            {
+                throw new BuckarooInvalidSettingsException();
+            }
+
             return new SdkClient()
                 .CreateRequest()
-                .Authenticate(input.WebsiteKey, input.SecretKey, input.IsLive, CultureInfo.CurrentCulture);
+                .Authenticate(credentials.WebsiteKey, credentials.SecretKey, credentials.IsLive, CultureInfo.CurrentCulture);
         }
     }
 }

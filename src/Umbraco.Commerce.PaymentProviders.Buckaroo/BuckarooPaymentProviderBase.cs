@@ -21,23 +21,21 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 
         public override string GetCancelUrl(PaymentProviderContext<TSettings> context)
         {
-            ArgumentNullException.ThrowIfNull(context);
-            ArgumentNullException.ThrowIfNull(context.Settings, "settings");
-            ArgumentNullException.ThrowIfNull(context.Settings.CancelUrl, "settings.CancelUrl");
+            ArgumentNullException.ThrowIfNull(context?.Settings.CancelUrl, "settings.CancelUrl");
 
             return context.Settings.CancelUrl;
         }
 
         public override string GetContinueUrl(PaymentProviderContext<TSettings> context)
         {
-            ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(context?.Settings.ContinueUrl);
 
-            return context.Settings.ContinueUrl; // + (settings.ContinueUrl.Contains("?") ? "&" : "?") + "session_id={CHECKOUT_SESSION_ID}";
+            return context.Settings.ContinueUrl;
         }
 
         public override string GetErrorUrl(PaymentProviderContext<TSettings> context)
         {
-            ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(context?.Settings.ErrorUrl);
 
             return context.Settings.ErrorUrl;
         }

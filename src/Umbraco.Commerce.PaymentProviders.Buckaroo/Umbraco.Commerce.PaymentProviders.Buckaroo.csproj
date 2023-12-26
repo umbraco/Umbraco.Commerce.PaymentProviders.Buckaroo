@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BuckarooSdk" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
