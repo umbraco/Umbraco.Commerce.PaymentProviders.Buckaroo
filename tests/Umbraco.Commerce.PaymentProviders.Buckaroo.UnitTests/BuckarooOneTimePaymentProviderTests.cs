@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using FluentAssertions;
 using Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
@@ -29,6 +29,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
                     ""IsTest"": true,
                     ""Order"": ""ORDER-01437-26779-SJRWY"",
                     ""Currency"": ""EUR"",
+                    ""AmountCredit"": 22.6,
                     ""AmountDebit"": 21.6,
                     ""TransactionType"": ""C021"",
                     ""Services"": null,
@@ -47,20 +48,13 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
                   }
                 }";
             byte[] data = System.Text.Encoding.UTF8.GetBytes(json);
-            BuckarooWebhookTransaction? expect = JsonConvert.DeserializeObject<BuckarooWebhookResponse>(json)!.Transaction;
 
             // execute
             BuckarooWebhookTransaction? actual = BuckarooWebhookHelper.ParseDataFromBytes(data);
 
             // asserts
-            Assert.NotNull(actual);
-            Assert.Equal(JsonConvert.SerializeObject(expect, new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            }), JsonConvert.SerializeObject(actual, new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            }));
+            actual.Should().NotBeNull();
+            TestHelpers.AssertAllPropertiesAreNotNull(actual);
         }
     }
 }
