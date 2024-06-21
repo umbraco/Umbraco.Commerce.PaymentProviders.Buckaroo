@@ -1,23 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BuckarooSdk.Connection;
 using BuckarooSdk.DataTypes;
 using BuckarooSdk.DataTypes.RequestBases;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Api;
 using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.Core.PaymentProviders;
 using Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions;
 using Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks;
+using Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks.Exceptions;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 {
@@ -136,43 +134,31 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             request.Headers.TryGetValues("Authorization", out IEnumerable<string>? headers);
             if (headers == null || string.IsNullOrEmpty(headers.FirstOrDefault()))
             {
-                return null;
+                throw new BuckarooWebhookInvalidAuthorizationHeaderException(context.Order.OrderNumber, context.Order.CartNumber, request.RequestUri!);
             }
 
             if (request.Content == null)
             {
-                return null;
+                throw new BuckarooWebhookEmptyBodyException(context.Order.OrderNumber, context.Order.CartNumber, request.RequestUri!);
             }
-
-            string authorizationHeader = headers.First();
-            BuckarooApiCredentials apiCredentials = context.Settings.GetApiCredentials();
-            byte[] requestBody = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
-            SignatureCalculationService signatureService = new();
 
 #pragma warning disable CA1308 // Do not normalize strings to uppercase because Buckaroo asks for lowercase string ¯\_(ツ)_/¯
             string webhookHostname = !string.IsNullOrWhiteSpace(context.Settings.WebhookHostnameOverwrite) ? context.Settings.WebhookHostnameOverwrite : request.RequestUri!.Authority;
             string encodedUri = WebUtility.UrlEncode(webhookHostname + request.RequestUri!.PathAndQuery).ToLowerInvariant();
 #pragma warning restore CA1308 // Normalize strings to uppercase
 
+            byte[] requestBody = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+            string authorizationHeader = headers.First();
+            BuckarooApiCredentials apiCredentials = context.Settings.GetApiCredentials();
+
+            SignatureCalculationService signatureService = new();
             bool signatureVerified = signatureService.VerifySignature(requestBody, request.Method.Method.ToUpperInvariant(), encodedUri, apiCredentials.SecretKey, authorizationHeader);
             if (!signatureVerified)
             {
-                Logger.Error("Buckaroo - Invalid signature. OrderNumber: '{OrderNumber}', CartNumber: '{CartNumber}'. encodedUri: '{encodedUri}'", context.Order.OrderNumber, context.Order.CartNumber, encodedUri);
-                return null;
+                throw new BuckarooWebhookInvalidSignatureException(context.Order.OrderNumber, context.Order.CartNumber, encodedUri);
             }
 
-            Stream stream = new MemoryStream(requestBody);
-            if (stream.CanSeek)
-            {
-                stream.Seek(0, SeekOrigin.Begin);
-            }
-
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            {
-                string requestBodyContent = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-                BuckarooWebhookTransaction buckarooEvent = JsonConvert.DeserializeObject<BuckarooWebhookResponse?>(requestBodyContent)?.Transaction ?? throw new NotImplementedException("Unable to parse buckaroo push message to object");
-                return buckarooEvent;
-            }
+            return BuckarooWebhookHelper.ParseDataFromBytes(requestBody);
         }
 
         public override Task<ApiResult> FetchPaymentStatusAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken = default)

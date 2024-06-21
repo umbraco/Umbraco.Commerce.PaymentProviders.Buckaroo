@@ -472,4 +472,6 @@ $RECYCLE.BIN/
 ## Umbraco Commerce specific
 ##
 /local_pack.bat
+**/packages.lock.json
+
 **/wwwroot/dist

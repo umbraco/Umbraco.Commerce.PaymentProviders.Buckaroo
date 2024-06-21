@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Client\**" />
     <Content Remove="Client\**" />
     <EmbeddedResource Remove="Client\**" />
