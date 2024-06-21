@@ -21,7 +21,7 @@ using Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 {
-    [PaymentProvider("buckaroo-onetime-payment", "Buckaroo One Time Payment", "Buckaroo one time payment provider")]
+    [PaymentProvider("buckaroo-onetime-payment")]
     public class BuckarooOneTimePaymentProvider : BuckarooPaymentProviderBase<BuckarooOneTimePaymentProvider, BuckarooOneTimeSettings>
     {
         private readonly IHttpContextAccessor _httpContextAccessor;

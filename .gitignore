@@ -472,3 +472,4 @@ $RECYCLE.BIN/
 ## Umbraco Commerce specific
 ##
 /local_pack.bat
+**/wwwroot/dist

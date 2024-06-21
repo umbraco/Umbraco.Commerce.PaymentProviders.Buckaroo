@@ -1,0 +1,13 @@
+{
+  "name": "Umbraco Commerce Buckaroo Payment Provider",
+  "$schema": "../umbraco-package-schema.json",
+  "extensions": [
+    {
+      "name": "Umbraco Commerce Buckaroo Payment Provider Entry Point",
+      "alias": "Umbraco.Commerce.PaymentProviders.Buckaroo.EntryPoint",
+      "type": "entryPoint",
+      "js": "/App_Plugins/UmbracoCommerceBuckarooPaymentProvider/dist/umbraco-commerce-buckaroo-payment-provider.js"
+    }
+  ],
+  "version": ""
+}
