@@ -1,5 +1,3 @@
-import type { UmbLocalizationDictionary } from '@umbraco-cms/backoffice/localization-api';
-
 export default {
     paymentProviders: {
         'buckaroo-onetime-paymentLabel': 'Buckaroo One Time Payment',
@@ -19,4 +17,4 @@ export default {
         'buckaroo-onetime-paymentSettingsIsTestModeLabel': 'Enable test mode',
         'buckaroo-onetime-paymentSettingsIsTestModeDescription': 'Set whether to process payments in test mode',
     },
-} as UmbLocalizationDictionary;
+};

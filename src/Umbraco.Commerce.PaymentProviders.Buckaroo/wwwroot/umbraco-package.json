@@ -3,10 +3,14 @@
   "$schema": "../umbraco-package-schema.json",
   "extensions": [
     {
-      "name": "Umbraco Commerce Buckaroo Payment Provider Entry Point",
-      "alias": "Umbraco.Commerce.PaymentProviders.Buckaroo.EntryPoint",
-      "type": "entryPoint",
-      "js": "/App_Plugins/UmbracoCommerceBuckarooPaymentProvider/dist/umbraco-commerce-buckaroo-payment-provider.js"
+      "type": "localization",
+      "alias": "UmbracoCommerce.PaymentProviders.Buckaroo.Localization.En_US",
+      "weight": -100,
+      "name": "English (US)",
+      "meta": {
+        "culture": "en-us"
+      },
+      "js": "/App_Plugins/UmbracoCommerceBuckarooPaymentProvider/lang/en-us.js"
     }
   ],
   "version": ""
