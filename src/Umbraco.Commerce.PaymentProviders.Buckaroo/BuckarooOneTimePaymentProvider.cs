@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using BuckarooSdk.Connection;
 using BuckarooSdk.DataTypes;
 using BuckarooSdk.DataTypes.RequestBases;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Primitives;
 using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Api;
 using Umbraco.Commerce.Core.Models;
@@ -102,7 +102,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 
             try
             {
-                BuckarooWebhookTransaction? buckarooEvent = await ParseWebhookDataAsync(context, cancellationToken).ConfigureAwait(false);
+                BuckarooWebhookTransaction? buckarooEvent = ParseWebhookData(context);
                 if (buckarooEvent == null || !buckarooEvent.IsSuccess)
                 {
                     // Just returns OK without finalizing the order
@@ -128,31 +128,31 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             return CallbackResult.BadRequest();
         }
 
-        private async Task<BuckarooWebhookTransaction?> ParseWebhookDataAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken)
+        private static BuckarooWebhookTransaction? ParseWebhookData(PaymentProviderContext<BuckarooOneTimeSettings> context)
         {
-            HttpRequestMessage request = context.Request;
-            request.Headers.TryGetValues("Authorization", out IEnumerable<string>? headers);
-            if (headers == null || string.IsNullOrEmpty(headers.FirstOrDefault()))
+            HttpRequest request = context.HttpContext.Request;
+            request.Headers.TryGetValue("Authorization", out StringValues header);
+            string?[] authorizationHeaders = header.ToArray();
+            if (authorizationHeaders == null || string.IsNullOrEmpty(authorizationHeaders.FirstOrDefault()))
             {
-                throw new BuckarooWebhookInvalidAuthorizationHeaderException(context.Order.OrderNumber, context.Order.CartNumber, request.RequestUri!);
+                throw new BuckarooWebhookInvalidAuthorizationHeaderException(context.Order.OrderNumber, context.Order.CartNumber, request.GetDisplayUrl());
             }
 
-            if (request.Content == null)
+            if (request.Body == null)
             {
-                throw new BuckarooWebhookEmptyBodyException(context.Order.OrderNumber, context.Order.CartNumber, request.RequestUri!);
+                throw new BuckarooWebhookEmptyBodyException(context.Order.OrderNumber, context.Order.CartNumber, request.GetDisplayUrl());
             }
 
 #pragma warning disable CA1308 // Do not normalize strings to uppercase because Buckaroo asks for lowercase string ¯\_(ツ)_/¯
-            string webhookHostname = !string.IsNullOrWhiteSpace(context.Settings.WebhookHostnameOverwrite) ? context.Settings.WebhookHostnameOverwrite : request.RequestUri!.Authority;
-            string encodedUri = WebUtility.UrlEncode(webhookHostname + request.RequestUri!.PathAndQuery).ToLowerInvariant();
+            string webhookHostname = !string.IsNullOrWhiteSpace(context.Settings.WebhookHostnameOverwrite) ? context.Settings.WebhookHostnameOverwrite : request.Host.Host;
+            string encodedUri = (webhookHostname + request.GetEncodedPathAndQuery()).ToLowerInvariant();
 #pragma warning restore CA1308 // Normalize strings to uppercase
 
-            byte[] requestBody = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
-            string authorizationHeader = headers.First();
+            byte[] requestBody = request.Body.ToByteArray();
             BuckarooApiCredentials apiCredentials = context.Settings.GetApiCredentials();
 
             SignatureCalculationService signatureService = new();
-            bool signatureVerified = signatureService.VerifySignature(requestBody, request.Method.Method.ToUpperInvariant(), encodedUri, apiCredentials.SecretKey, authorizationHeader);
+            bool signatureVerified = signatureService.VerifySignature(requestBody, request.Method.ToUpperInvariant(), encodedUri, apiCredentials.SecretKey, authorizationHeaders.First());
             if (!signatureVerified)
             {
                 throw new BuckarooWebhookInvalidSignatureException(context.Order.OrderNumber, context.Order.CartNumber, encodedUri);
