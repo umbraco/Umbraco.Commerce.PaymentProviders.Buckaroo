@@ -473,5 +473,3 @@ $RECYCLE.BIN/
 ##
 /local_pack.bat
 **/packages.lock.json
-
-**/wwwroot/dist

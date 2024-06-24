@@ -12,13 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Client\**" />
-    <Content Remove="Client\**" />
-    <EmbeddedResource Remove="Client\**" />
-    <None Remove="Client\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BuckarooSdk" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />

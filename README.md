@@ -3,7 +3,3 @@
 Buckaroo Payment Provider for Umbraco Commerce
 
 See docs: https://docs.umbraco.com/umbraco-commerce-payment-providers/buckaroo/buckaroo
-
-## Build frontend code locally
-- Install Nodejs v20+.
-- Go to `.\src\Umbraco.Commerce.PaymentProviders.Buckaroo\Client\` and run `npm i` then `npm run build`.
