@@ -474,3 +474,4 @@ $RECYCLE.BIN/
 /local_pack.bat
 **/packages.lock.json
 src/Umbraco.Commerce.PaymentProviders.Buckaroo/packages.lock.json
+src/**/packages.lock.json
