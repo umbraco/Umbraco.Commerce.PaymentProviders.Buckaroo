@@ -1,5 +1,5 @@
 export default {
-    paymentProviders: {
+    ucPaymentProviders: {
         'buckarooOnetimePaymentLabel': 'Buckaroo One Time Payment',
         'buckarooOnetimePaymentDescription': 'Buckaroo payment provider for one time checkout',
         'buckarooOnetimePaymentSettingsContinueUrlLabel': 'Continue URL',
