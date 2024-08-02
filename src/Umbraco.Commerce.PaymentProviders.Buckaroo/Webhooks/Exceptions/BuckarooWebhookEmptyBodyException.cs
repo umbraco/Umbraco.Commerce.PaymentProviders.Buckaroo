@@ -11,7 +11,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks.Exceptions
         public BuckarooWebhookEmptyBodyException(
             string orderNumber,
             string cartNumber,
-            Uri webhookUri)
+            string webhookUri)
             : base(string.Format(CultureInfo.InvariantCulture, _messageFormat, orderNumber, cartNumber, webhookUri))
         {
         }

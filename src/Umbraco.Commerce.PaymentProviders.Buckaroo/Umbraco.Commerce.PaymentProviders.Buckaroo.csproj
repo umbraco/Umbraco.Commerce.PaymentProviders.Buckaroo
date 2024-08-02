@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <Title>Umbraco Commerce Buckaroo Payment Provider</Title>
     <Description>Buckaroo payment provider for Umbraco Commerce</Description>
     <Nullable>enable</Nullable>
+    <StaticWebAssetBasePath>App_Plugins/UmbracoCommerceBuckarooPaymentProvider</StaticWebAssetBasePath>
   </PropertyGroup>
 
   <ItemGroup>
