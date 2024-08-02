@@ -2,4 +2,5 @@
 
 Buckaroo Payment Provider for Umbraco Commerce
 
-See docs: https://docs.umbraco.com/umbraco-commerce-payment-providers/buckaroo/buckaroo
+- Documentation: https://docs.umbraco.com/umbraco-commerce-payment-providers/buckaroo/buckaroo
+- Release notes: https://github.com/umbraco/Umbraco.Commerce.PaymentProviders.Buckaroo/releases
