@@ -57,7 +57,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             ArgumentNullException.ThrowIfNull(context);
 
             OrderReadOnly order = context.Order;
-            CurrencyReadOnly currency = Context.Services.CurrencyService.GetCurrency(order.CurrencyId);
+            CurrencyReadOnly currency = await Context.Services.CurrencyService.GetCurrencyAsync(order.CurrencyId);
             string currencyCode = currency.Code.ToUpperInvariant();
             var data = new TransactionBase
             {
