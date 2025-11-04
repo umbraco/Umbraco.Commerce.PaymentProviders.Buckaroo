@@ -16,5 +16,13 @@ export default {
         'buckarooOnetimePaymentSettingsWebhookHostnameOverwriteDescription': 'If you rewrite incoming host headers to a different value, set this to the hostname where the buyer does the checkout action. Enter hostname only eg: \'umbraco.com\'',
         'buckarooOnetimePaymentSettingsIsTestModeLabel': 'Enable test mode',
         'buckarooOnetimePaymentSettingsIsTestModeDescription': 'Set whether to process payments in test mode',
+
+        'buckarooOnetimePaymentMetaDataBuckarooSessionIdLabel': 'Buckaroo Session ID',
+        'buckarooOnetimePaymentMetaDataBuckarooCustomerIdLabel': 'Buckaroo Customer ID',
+        'buckarooOnetimePaymentMetaDataBuckarooPaymentIntentIdLabel': 'Buckaroo Payment Intent ID',
+        'buckarooOnetimePaymentMetaDataBuckarooSubscriptionIdLabel': 'Buckaroo Subscription ID',
+        'buckarooOnetimePaymentMetaDataBuckarooChargeIdLabel': 'Buckaroo Charge ID',
+        'buckarooOnetimePaymentMetaDataBuckarooCardCountryLabel': 'Buckaroo Card Country',
+
     },
 };

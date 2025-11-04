@@ -42,15 +42,15 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
         // Don't finalize at continue as we will finalize async via webhook
         public override bool FinalizeAtContinueUrl => false;
 
-        public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]
-        {
-            new TransactionMetaDataDefinition("buckarooSessionId", "Buckaroo Session ID"),
-            new TransactionMetaDataDefinition("buckarooCustomerId", "Buckaroo Customer ID"),
-            new TransactionMetaDataDefinition("buckarooPaymentIntentId", "Buckaroo Payment Intent ID"),
-            new TransactionMetaDataDefinition("buckarooSubscriptionId", "Buckaroo Subscription ID"),
-            new TransactionMetaDataDefinition("buckarooChargeId", "Buckaroo Charge ID"),
-            new TransactionMetaDataDefinition("buckarooCardCountry", "Buckaroo Card Country"),
-        };
+        public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions =>
+        [
+            new("buckarooSessionId"),
+            new("buckarooCustomerId"),
+            new("buckarooPaymentIntentId"),
+            new("buckarooSubscriptionId"),
+            new("buckarooChargeId"),
+            new("buckarooCardCountry")
+        ];
 
         public override async Task<PaymentFormResult> GenerateFormAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken = default)
         {
