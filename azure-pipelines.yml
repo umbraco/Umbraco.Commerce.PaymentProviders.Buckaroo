@@ -30,8 +30,12 @@ stages:
   - stage: Build
     variables:
       NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+
     jobs:
       - job: Build
+        variables:
+        - group: "dependency-track"    
+        
         pool: 
           vmImage: ubuntu-latest
         steps:
@@ -82,3 +86,45 @@ stages:
             inputs:
               targetPath: $(Build.SourcesDirectory)
               artifactName: build_output
+
+          # Generate/upload SBOM with cdxgen
+          - script: |
+              cd $(Build.SourcesDirectory)
+              npm install --global @cyclonedx/cdxgen
+            displayName: 'Install cdxgen'
+
+          - script: |
+              mkdir -p $(Build.ArtifactStagingDirectory)/bom
+              cd $(Build.SourcesDirectory)
+
+              # Debug: print only the last 5 characters of the variables (do not print full secret)
+              if [ -n "$DT_BASE_URL" ]; then
+                printf 'DT_BASE_URL last 5: %s\n' "${DT_BASE_URL: -5}"
+              else
+                echo 'DT_BASE_URL is empty'
+              fi
+
+              if [ -n "$DT_API_KEY" ]; then
+                printf 'DT_API_KEY last 5: %s\n' "${DT_API_KEY: -5}"
+              else
+                echo 'DT_API_KEY is empty'
+              fi
+
+              cdxgen --recurse \
+                --output $(Build.ArtifactStagingDirectory)/bom/bom.json \
+                --json-pretty \
+                --project-group "DXP" \
+                --project-name "Umbraco.Commerce.PaymentProviders.Buckaroo" \
+                --project-version "v13" \
+                --server-url "$DT_BASE_URL" \
+                --api-key "$DT_API_KEY"
+            displayName: 'Generate & upload SBOM with cdxgen'
+            env:
+              DT_API_KEY: $(DT_API_KEY)
+              DT_BASE_URL: $(DT_BASE_URL)
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish SBOM Artifact'
+            inputs:
+              targetPath: $(Build.ArtifactStagingDirectory)/bom
+              artifactName: SBOM
