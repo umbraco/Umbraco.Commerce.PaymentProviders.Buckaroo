@@ -106,13 +106,25 @@ stages:
                 $VERSION = 'vUNKNOWN'
                 if (Test-Path 'version.json') {
                   try {
-                    $VERSION = (Get-Content 'version.json' -Raw | ConvertFrom-Json).version
+                    $rawVersion = (Get-Content 'version.json' -Raw | ConvertFrom-Json).version
                   } catch {
                     if ((Get-Content 'version.json' -Raw) -match '"version"\s*:\s*"([^"]+)"') {
-                      $VERSION = $matches[1]
+                      $rawVersion = $matches[1]
+                    }
+                  }
+
+                  if ($rawVersion) {
+                    # Extract major part (e.g. "1" from "1.2.3") and add "v" prefix
+                    if ($rawVersion -match '^(\d+)\.') {
+                      $VERSION = "v$($matches[1])"
+                    } elseif ($rawVersion -match '^\d+$') {
+                      $VERSION = "v$rawVersion"
+                    } else {
+                      $VERSION = "vUNKNOWN"
                     }
                   }
                 }
+
                 Write-Host "Project version: $VERSION"
 
                 # derive project name
@@ -135,7 +147,6 @@ stages:
             env:
               DT_API_KEY: $(DT_API_KEY)
               DT_BASE_URL: $(DT_BASE_URL)
-
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish SBOM Artifact'
