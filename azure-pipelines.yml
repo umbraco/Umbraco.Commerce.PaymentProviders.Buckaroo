@@ -34,7 +34,7 @@ stages:
     jobs:
       - job: Build
         variables:
-        - group: "dependency-track"    
+        - group: "dependency-track"
         
         pool: 
           vmImage: ubuntu-latest
