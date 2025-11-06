@@ -104,24 +104,38 @@ stages:
 
                 # version
                 $VERSION = 'vUNKNOWN'
-                if (Test-Path 'version.json') { try { $VERSION = (Get-Content 'version.json' -Raw | ConvertFrom-Json).version } catch { if ((Get-Content 'version.json' -Raw) -match '"version"\s*:\s*"([^"]+)"') { $VERSION = $matches[1] } } }
+                if (Test-Path 'version.json') {
+                  try {
+                    $VERSION = (Get-Content 'version.json' -Raw | ConvertFrom-Json).version
+                  } catch {
+                    if ((Get-Content 'version.json' -Raw) -match '"version"\s*:\s*"([^"]+)"') {
+                      $VERSION = $matches[1]
+                    }
+                  }
+                }
                 Write-Host "Project version: $VERSION"
 
-                # derive project name from solution variable
+                # derive project name
                 $PROJECT_NAME = [System.IO.Path]::GetFileNameWithoutExtension("$(solution)")
                 Write-Host "Project name: $PROJECT_NAME"
 
                 # short debug (last 5 chars)
                 foreach ($name in 'DT_BASE_URL','DT_API_KEY') {
-                  $v = $$env:$name
-                  if ($v) { $last = if ($v.Length -gt 5) { $v.Substring($v.Length-5) } else { $v }; Write-Host "$name (last5): ...$last" } else { Write-Host "$name is empty" }
+                  $v = (Get-Item "Env:$name").Value
+                  if ($v) {
+                    $last = if ($v.Length -gt 5) { $v.Substring($v.Length-5) } else { $v }
+                    Write-Host "$name (last5): ...$last"
+                  } else {
+                    Write-Host "$name is empty"
+                  }
                 }
 
                 Write-Host 'Running cdxgen ...'
-                & cdxgen '--recurse' '--output' "$(Build.ArtifactStagingDirectory)/bom/bom.json" '--json-pretty' '--project-group' 'DXP' '--project-name' $PROJECT_NAME '--project-version' $VERSION '--server-url' $$env:DT_BASE_URL '--api-key' $$env:DT_API_KEY
+                & cdxgen '--recurse' '--output' "$(Build.ArtifactStagingDirectory)/bom/bom.json" '--json-pretty' '--project-group' 'DXP' '--project-name' $PROJECT_NAME '--project-version' $VERSION '--server-url' $env:DT_BASE_URL '--api-key' $env:DT_API_KEY
             env:
               DT_API_KEY: $(DT_API_KEY)
               DT_BASE_URL: $(DT_BASE_URL)
+
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish SBOM Artifact'
