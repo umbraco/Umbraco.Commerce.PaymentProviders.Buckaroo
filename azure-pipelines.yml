@@ -113,12 +113,12 @@ stages:
 
                 # short debug (last 5 chars)
                 foreach ($name in 'DT_BASE_URL','DT_API_KEY') {
-                  $v = $env:$name
+                  $v = $$env:$name
                   if ($v) { $last = if ($v.Length -gt 5) { $v.Substring($v.Length-5) } else { $v }; Write-Host "$name (last5): ...$last" } else { Write-Host "$name is empty" }
                 }
 
                 Write-Host 'Running cdxgen ...'
-                & cdxgen '--recurse' '--output' "$(Build.ArtifactStagingDirectory)/bom/bom.json" '--json-pretty' '--project-group' 'DXP' '--project-name' $PROJECT_NAME '--project-version' $VERSION '--server-url' $env:DT_BASE_URL '--api-key' $env:DT_API_KEY
+                & cdxgen '--recurse' '--output' "$(Build.ArtifactStagingDirectory)/bom/bom.json" '--json-pretty' '--project-group' 'DXP' '--project-name' $PROJECT_NAME '--project-version' $VERSION '--server-url' $$env:DT_BASE_URL '--api-key' $$env:DT_API_KEY
             env:
               DT_API_KEY: $(DT_API_KEY)
               DT_BASE_URL: $(DT_BASE_URL)
