@@ -11,6 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="BuckarooSdk" Version="[1.5.4, 1.999.999)" />
-    <PackageVersion Include="Umbraco.Commerce.Core" Version="[17.0.0, 17.999.999)" />
+    <PackageVersion Include="Umbraco.Commerce.Core" Version="[18.0.0, 18.999.999)" />
   </ItemGroup>
 </Project>
