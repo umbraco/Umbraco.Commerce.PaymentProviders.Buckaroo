@@ -103,7 +103,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 
             try
             {
-                BuckarooWebhookTransaction buckarooEvent = ParseWebhookData(context);
+                BuckarooWebhookTransaction buckarooEvent = await ParseWebhookDataAsync(context, cancellationToken).ConfigureAwait(false);
                 if (!buckarooEvent.IsSuccess)
                 {
                     return CallbackResult.Ok(new TransactionInfo
@@ -132,7 +132,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             return CallbackResult.BadRequest();
         }
 
-        private BuckarooWebhookTransaction ParseWebhookData(PaymentProviderContext<BuckarooOneTimeSettings> context)
+        private async Task<BuckarooWebhookTransaction> ParseWebhookDataAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken)
         {
             Logger.Info("Begin parsing buckaroo callback data.");
 
@@ -154,7 +154,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             string encodedUri = WebUtility.UrlEncode(webhookHostname + request.GetEncodedPathAndQuery()).ToLowerInvariant();
 #pragma warning restore CA1308 // Normalize strings to uppercase
 
-            byte[] requestBody = request.Body.ToByteArray();
+            byte[] requestBody = await request.Body.ToByteArrayAsync(cancellationToken).ConfigureAwait(false);
             BuckarooApiCredentials apiCredentials = context.Settings.GetApiCredentials();
 
             SignatureCalculationService signatureService = new();
