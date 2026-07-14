@@ -1,10 +1,12 @@
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions
 {
     internal static class StreamExtensions
     {
-        public static byte[] ToByteArray(this Stream stream)
+        public static async Task<byte[]> ToByteArrayAsync(this Stream stream, CancellationToken cancellationToken = default)
         {
             if (stream is MemoryStream memoryStream)
             {
@@ -13,7 +15,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.Extensions
 
             using (MemoryStream ms = new())
             {
-                stream.CopyTo(ms);
+                await stream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
                 return ms.ToArray();
             }
         }
