@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.PaymentProviders.Buckaroo.Webhooks;
 
 namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
@@ -55,6 +56,61 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
             // asserts
             actual.Should().NotBeNull();
             TestHelpers.AssertAllPropertiesAreNotNull(actual);
+            actual.ServiceCode.Should().Be("ideal");
+        }
+
+        [Theory]
+        [InlineData("ideal")]
+        [InlineData("creditcard")]
+        [InlineData("paypal")]
+        public void Callback_Should_Save_Selected_Payment_Method(string serviceCode)
+        {
+            BuckarooWebhookTransaction transaction = new()
+            {
+                Key = "transaction-key",
+                ServiceCode = serviceCode,
+                AmountDebit = 21.6m,
+                Status = new BuckarooWebhookTransactionStatusCode
+                {
+                    Code = new BuckarooWebhookTransactionStatusCodeDetails { Code = BuckarooSdk.Constants.Status.Success },
+                },
+            };
+
+            var result = BuckarooOneTimePaymentProvider.CreateCallbackResult(transaction);
+
+            result.TransactionInfo.TransactionId.Should().Be("transaction-key");
+            result.TransactionInfo.PaymentStatus.Should().Be(PaymentStatus.Captured);
+            result.TransactionInfo.AmountAuthorized.Should().Be(21.6m);
+            result.MetaData.Should().ContainKey("buckarooPaymentMethod").WhoseValue.Should().Be(serviceCode);
+        }
+
+        [Fact]
+        public void Unsuccessful_Callback_Should_Save_Selected_Payment_Method_Without_Authorizing_Amount()
+        {
+            BuckarooWebhookTransaction transaction = new()
+            {
+                ServiceCode = "paypal",
+                AmountDebit = 21.6m,
+                Status = new BuckarooWebhookTransactionStatusCode
+                {
+                    Code = new BuckarooWebhookTransactionStatusCodeDetails { Code = BuckarooSdk.Constants.Status.CanceledByUser },
+                },
+            };
+
+            var result = BuckarooOneTimePaymentProvider.CreateCallbackResult(transaction);
+
+            result.TransactionInfo.PaymentStatus.Should().Be(PaymentStatus.Cancelled);
+            result.TransactionInfo.AmountAuthorized.Should().Be(0);
+            result.MetaData.Should().ContainKey("buckarooPaymentMethod").WhoseValue.Should().Be("paypal");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void Missing_Service_Code_Should_Not_Create_Payment_Method_MetaData(string? serviceCode)
+        {
+            BuckarooOneTimePaymentProvider.GetPaymentMethodMetaData(serviceCode).Should().BeEmpty();
         }
     }
 }

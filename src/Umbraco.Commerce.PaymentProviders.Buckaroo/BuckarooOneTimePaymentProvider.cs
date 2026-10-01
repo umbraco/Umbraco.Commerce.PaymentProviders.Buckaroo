@@ -43,6 +43,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
 
         public override IEnumerable<TransactionMetaDataDefinition> TransactionMetaDataDefinitions => new[]
         {
+            new TransactionMetaDataDefinition("buckarooPaymentMethod", "Buckaroo Payment Method"),
             new TransactionMetaDataDefinition("buckarooSessionId", "Buckaroo Session ID"),
             new TransactionMetaDataDefinition("buckarooCustomerId", "Buckaroo Customer ID"),
             new TransactionMetaDataDefinition("buckarooPaymentIntentId", "Buckaroo Payment Intent ID"),
@@ -103,22 +104,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             try
             {
                 BuckarooWebhookTransaction? buckarooEvent = await ParseWebhookDataAsync(context, cancellationToken).ConfigureAwait(false);
-                if (buckarooEvent == null || !buckarooEvent.IsSuccess)
-                {
-                    // Just returns OK without finalizing the order
-                    return CallbackResult.Empty;
-                }
-
-                OrderReadOnly order = context.Order;
-
-                var transactionInfo = new TransactionInfo
-                {
-                    TransactionId = buckarooEvent.Key,
-                    PaymentStatus = buckarooEvent.Status.Code.Code.ToPaymentStatus(),
-                    AmountAuthorized = buckarooEvent.AmountDebit ?? buckarooEvent.AmountCredit ?? 0,
-                };
-
-                return CallbackResult.Ok(transactionInfo);
+                return CreateCallbackResult(buckarooEvent);
             }
             catch (Exception ex)
             {
@@ -126,6 +112,31 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
             }
 
             return CallbackResult.BadRequest();
+        }
+
+        internal static CallbackResult CreateCallbackResult(BuckarooWebhookTransaction? buckarooEvent)
+        {
+            if (buckarooEvent == null || !buckarooEvent.IsSuccess)
+            {
+                // Just returns OK without finalizing the order
+                return CallbackResult.Empty;
+            }
+
+            var transactionInfo = new TransactionInfo
+            {
+                TransactionId = buckarooEvent.Key,
+                PaymentStatus = buckarooEvent.Status.Code.Code.ToPaymentStatus(),
+                AmountAuthorized = buckarooEvent.AmountDebit ?? buckarooEvent.AmountCredit ?? 0,
+            };
+
+            return CallbackResult.Ok(transactionInfo, GetPaymentMethodMetaData(buckarooEvent.ServiceCode));
+        }
+
+        internal static IDictionary<string, string> GetPaymentMethodMetaData(string? serviceCode)
+        {
+            return string.IsNullOrWhiteSpace(serviceCode)
+                ? new Dictionary<string, string>()
+                : new Dictionary<string, string> { ["buckarooPaymentMethod"] = serviceCode };
         }
 
         private async Task<BuckarooWebhookTransaction?> ParseWebhookDataAsync(PaymentProviderContext<BuckarooOneTimeSettings> context, CancellationToken cancellationToken)
@@ -181,6 +192,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
                         TransactionId = order.TransactionInfo.TransactionId,
                         PaymentStatus = status.Status.Code.Code.ToPaymentStatus(),
                     },
+                    MetaData = GetPaymentMethodMetaData(status.ServiceCode),
                 });
             }
             catch (Exception ex)
