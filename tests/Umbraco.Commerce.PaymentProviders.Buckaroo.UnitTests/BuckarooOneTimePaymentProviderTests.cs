@@ -56,5 +56,26 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
             actual.Should().NotBeNull();
             TestHelpers.AssertAllPropertiesAreNotNull(actual);
         }
+
+        [Theory]
+        [InlineData("ideal")]
+        [InlineData("paypal")]
+        [InlineData("visa")]
+        public void CreatePaymentMethodMetaData_Should_Contain_ServiceCode(string serviceCode)
+        {
+            Dictionary<string, string> actual = BuckarooOneTimePaymentProvider.CreatePaymentMethodMetaData(serviceCode);
+
+            actual.Should().ContainKey(BuckarooOneTimePaymentProvider.PaymentMethodMetaDataKey)
+                .WhoseValue.Should().Be(serviceCode);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void CreatePaymentMethodMetaData_Should_Be_Empty_When_No_ServiceCode(string? serviceCode)
+        {
+            BuckarooOneTimePaymentProvider.CreatePaymentMethodMetaData(serviceCode).Should().BeEmpty();
+        }
     }
 }

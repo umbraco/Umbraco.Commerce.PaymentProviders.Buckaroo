@@ -23,6 +23,7 @@ export default {
         'buckarooOnetimePaymentMetaDataBuckarooSubscriptionIdLabel': 'Buckaroo Subscription ID',
         'buckarooOnetimePaymentMetaDataBuckarooChargeIdLabel': 'Buckaroo Charge ID',
         'buckarooOnetimePaymentMetaDataBuckarooCardCountryLabel': 'Buckaroo Card Country',
+        'buckarooOnetimePaymentMetaDataBuckarooPaymentMethodLabel': 'Buckaroo Payment Method',
 
     },
 };
