@@ -20,16 +20,21 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
             code.ToPaymentStatus().Should().Be(PaymentStatus.Cancelled);
         }
 
-        // Pending and on-hold codes (790-793) map to Error too; this pins the current behaviour.
+        [Theory]
+        [InlineData(BuckarooSdk.Constants.Status.PendingInput)]
+        [InlineData(BuckarooSdk.Constants.Status.PendingProcessing)]
+        [InlineData(BuckarooSdk.Constants.Status.WaitingForConsumer)]
+        [InlineData(BuckarooSdk.Constants.Status.OnHold)]
+        public void Pending_And_On_Hold_Codes_Map_To_Pending(int code)
+        {
+            code.ToPaymentStatus().Should().Be(PaymentStatus.PendingExternalSystem);
+        }
+
         [Theory]
         [InlineData(BuckarooSdk.Constants.Status.Failed)]
         [InlineData(BuckarooSdk.Constants.Status.FailedValidation)]
         [InlineData(BuckarooSdk.Constants.Status.TechnicalError)]
         [InlineData(BuckarooSdk.Constants.Status.Declined)]
-        [InlineData(BuckarooSdk.Constants.Status.PendingInput)]
-        [InlineData(BuckarooSdk.Constants.Status.PendingProcessing)]
-        [InlineData(BuckarooSdk.Constants.Status.WaitingForConsumer)]
-        [InlineData(BuckarooSdk.Constants.Status.OnHold)]
         [InlineData(0)]
         public void Other_Codes_Map_To_Error(int code)
         {
