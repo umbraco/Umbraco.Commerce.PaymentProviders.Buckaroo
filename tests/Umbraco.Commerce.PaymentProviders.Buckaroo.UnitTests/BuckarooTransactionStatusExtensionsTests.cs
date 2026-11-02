@@ -20,7 +20,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
             code.ToPaymentStatus().Should().Be(PaymentStatus.Cancelled);
         }
 
-        // Pending codes (790-793) map to Error too. This pins the current behaviour; see Follow-ups in docs/upgrades/v19.md.
+        // Pending and on-hold codes (790-793) map to Error too; this pins the current behaviour.
         [Theory]
         [InlineData(BuckarooSdk.Constants.Status.Failed)]
         [InlineData(BuckarooSdk.Constants.Status.FailedValidation)]

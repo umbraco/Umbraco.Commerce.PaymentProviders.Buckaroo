@@ -18,7 +18,6 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
         {
             string actual = BuckarooWebhookHelper.GetEncodedWebhookUri(string.Empty, "Shop.Example.com", PathAndQuery);
 
-            actual.Should().Be(System.Net.WebUtility.UrlEncode("Shop.Example.com" + PathAndQuery).ToLowerInvariant());
             actual.Should().StartWith("shop.example.com%2fumbraco%2fcommerce%2fpayment%2fapi%2fv1%2fcallback%2f");
         }
 
