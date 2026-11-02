@@ -58,6 +58,33 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo.UnitTests
         }
 
         [Theory]
+        [InlineData("null")]
+        [InlineData("{}")]
+        public void ParseDataFromBytes_Should_Throw_When_No_Transaction(string json)
+        {
+            byte[] data = System.Text.Encoding.UTF8.GetBytes(json);
+
+            Action act = () => BuckarooWebhookHelper.ParseDataFromBytes(data);
+
+            act.Should().Throw<NotImplementedException>();
+        }
+
+        [Fact]
+        public void ParseDataFromBytes_Should_Map_Status_And_Amounts()
+        {
+            string json = """{"Transaction":{"Key":"K1","ServiceCode":"ideal","AmountDebit":10.5,"Status":{"Code":{"Code":890,"Description":"Cancelled"}}}}""";
+
+            BuckarooWebhookTransaction actual = BuckarooWebhookHelper.ParseDataFromBytes(System.Text.Encoding.UTF8.GetBytes(json));
+
+            actual.Key.Should().Be("K1");
+            actual.ServiceCode.Should().Be("ideal");
+            actual.AmountDebit.Should().Be(10.5m);
+            actual.AmountCredit.Should().BeNull();
+            actual.Status.Code.Code.Should().Be(890);
+            actual.IsSuccess.Should().BeFalse();
+        }
+
+        [Theory]
         [InlineData("ideal")]
         [InlineData("paypal")]
         [InlineData("visa")]

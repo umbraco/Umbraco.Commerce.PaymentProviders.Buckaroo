@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using BuckarooSdk.Connection;
@@ -164,10 +163,7 @@ namespace Umbraco.Commerce.PaymentProviders.Buckaroo
                 throw new BuckarooWebhookEmptyBodyException(context.Order.OrderNumber, context.Order.CartNumber, request.GetDisplayUrl());
             }
 
-#pragma warning disable CA1308 // Do not normalize strings to uppercase because Buckaroo asks for lowercase string ¯\_(ツ)_/¯
-            string webhookHostname = !string.IsNullOrWhiteSpace(context.Settings.WebhookHostnameOverwrite) ? context.Settings.WebhookHostnameOverwrite : request.Host.Host;
-            string encodedUri = WebUtility.UrlEncode(webhookHostname + request.GetEncodedPathAndQuery()).ToLowerInvariant();
-#pragma warning restore CA1308 // Normalize strings to uppercase
+            string encodedUri = BuckarooWebhookHelper.GetEncodedWebhookUri(context.Settings.WebhookHostnameOverwrite, request.Host.Host, request.GetEncodedPathAndQuery());
 
             byte[] requestBody = await request.Body.ToByteArrayAsync(cancellationToken).ConfigureAwait(false);
             BuckarooApiCredentials apiCredentials = context.Settings.GetApiCredentials();
